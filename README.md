@@ -1,62 +1,62 @@
 # Statistical Data Analysis Using Linear Regression
 
-ניתוח סטטיסטי של פופולריות שירים באמצעות רגרסיה לינארית — **קבוצה 66, חלק ב׳**.
+Statistical analysis of song popularity using linear regression — **Group 66, Part B**.
 
-הפרויקט בונה ומנתח מודל רגרסיה לינארית המסביר את מדד הפופולריות של שיר (`song_popularity`) על בסיס מאפייניו המוזיקליים והטכניים (טמפו, אנרגיה, יכולת ריקוד, משך, מטען רגשי ועוד), תוך בחינת אינטראקציות וטרנספורמציות שמשפרות את טיב ההתאמה ואת יכולת הניבוי.
+This project builds and analyzes a linear regression model that explains a song's popularity score (`song_popularity`) based on its musical and technical attributes (tempo, energy, danceability, duration, emotional valence, and more), while testing interactions and transformations that improve model fit and predictive power.
 
-## קבצים בריפו
+## Files in this repository
 
-| קובץ | תיאור |
-|------|-------|
-| `group_66_song_popularity_Part_B.R` | קוד ה-R המלא — עיבוד מקדים, בניית המודל, בדיקת הנחות ושיפור המודל |
-| `group_66_song_popularity_Part_B.docx` | הדוח המלא: תקציר מנהלים, מתודולוגיה, גרפים, תוצאות ומסקנות |
+| File | Description |
+|------|-------------|
+| `group_66_song_popularity_Part_B.R` | Full R code — preprocessing, model building, assumption checks, and model improvement |
+| `group_66_song_popularity_Part_B.docx` | Full report: executive summary, methodology, plots, results, and conclusions |
 
-## מטרת העבודה
+## Objective
 
-לבנות מודל רגרסיה לינארית שמסביר את הצלחת השיר, ולבחון האם אפקטים מורכבים — אינטראקציות בין מאפייני אודיו וטרנספורמציות לא-לינאריות — משפרים את המודל מעבר להשפעות הנפרדות של כל משתנה.
+To build a linear regression model that explains a song's success, and to test whether more complex effects — interactions between audio features and non-linear transformations — improve the model beyond the separate effect of each variable.
 
-## שלבי הניתוח
+## Analysis steps
 
-**1. עיבוד מקדים לנתונים**
+**1. Data preprocessing**
 
-- ניקוי חריגים בשיטת IQR ודדופליקציה של תצפיות כפולות.
-- הסרת משתנים חסרי תרומה: `time_signature` (שונות אפסית — כ-94% מהשירים ב-4/4) ו-`audio_mode` (מז'ור/מינור, מתאם אפסי r≈0.005).
-- המרת `song_duration_ms` לדקות לצורך פרשנות נוחה של המקדמים.
-- בחינת דיסקרטיזציה של `tempo` (מבחן ANOVA) ושל `instrumentalness` — ובחירה להשאיר אותם רציפים.
+- Outlier removal using the IQR method and deduplication of repeated observations.
+- Removal of non-contributing variables: `time_signature` (near-zero variance — about 94% of songs are in 4/4) and `audio_mode` (major/minor, near-zero correlation r≈0.005).
+- Conversion of `song_duration_ms` to minutes for easier interpretation of coefficients.
+- Discretization tests for `tempo` (ANOVA) and `instrumentalness` — both kept continuous after testing.
 
-**2. הגדרת משתני דמה ואינטראקציה**
+**2. Dummy and interaction variables**
 
-- משתני דמה לקצב: `Standard` (עד 122 BPM, קבוצת ייחוס), `Energetic` (122–140), `High Speed` (מעל 140).
-- שלושה משתני אינטראקציה על בסיס היגיון מוזיקלי: `danceability × energy`, `danceability × instrumentalness`, `audio_valence × energy` (כולל גרפי משטח תלת-ממדיים ב-plotly).
+- Tempo dummy variables: `Standard` (up to 122 BPM, reference group), `Energetic` (122–140), `High Speed` (above 140).
+- Three interaction terms based on musical reasoning: `danceability × energy`, `danceability × instrumentalness`, `audio_valence × energy` (including 3D surface plots in plotly).
 
-**3. בחירת משתנים ובדיקת הנחות**
+**3. Variable selection and assumption checks**
 
-- השוואה בין Backward Elimination ו-Forward Selection לפי קריטריון **AIC**; נבחר מודל ה-Backward (AIC נמוך יותר, 9 משתנים בלבד) בזכות יכולתו לשמר אינטראקציות מובהקות.
-- בדיקה ויזואלית (Residuals vs Fitted, Q-Q Plot) ופורמלית (מבחן **Ramsey RESET** לליניאריות, מבחן **Kolmogorov-Smirnov / Lilliefors** לנורמליות).
+- Comparison between Backward Elimination and Forward Selection using the **AIC** criterion; the Backward model was chosen (lower AIC, only 9 variables) for its ability to preserve significant interactions.
+- Visual checks (Residuals vs Fitted, Q-Q Plot) and formal tests (**Ramsey RESET** for linearity, **Kolmogorov-Smirnov / Lilliefors** for normality).
 
-**4. שיפור המודל**
+**4. Model improvement**
 
-- הוספת איבר ריבועי לאנרגיה (`energy²`) לזיהוי "אפקט הפעמון" — נקודת רוויה שמעבר לה אנרגיה גבוהה פוגעת בפופולריות.
-- הסרת `duration_min` (לא מובהק), `liveness` ו-`speechiness` (תרומה אפסית), והחלפת הטמפו הרציף במשתנה דמה בגלל מולטי-קולינאריות.
-- ניקוי תצפיות משפיעות באמצעות מרחק Cook.
+- Adding a quadratic term for energy (`energy²`) to capture a "bell-curve effect" — a saturation point beyond which high energy hurts popularity.
+- Removing `duration_min` (not significant), `liveness` and `speechiness` (near-zero contribution), and replacing continuous tempo with a dummy variable due to multicollinearity.
+- Removal of influential observations using Cook's distance.
 
-## תוצאות עיקריות
+## Key results
 
-- **ירידה של כ-5,642 נקודות ב-AIC** (מ-~86,676 ל-~81,034) ועלייה של כ-22% בשונות המוסברת (R²).
-- האינטראקציה `danceability × energy` היא הגורם המשפיע ביותר (מקדם ‎+31.32‎): הקהל מחפש שירים שהם גם קצביים וגם אנרגטיים.
-- אנרגיה לבדה מזיקה (`energy²` שלילי, ‎-24.11‎), שירים אינסטרומנטליים-רקידים נענשים, ושירים "שמחים" מצליחים בעיקר כשהם אנרגטיים.
-- העדפה מובהקת של הקהל להפקה אלקטרונית ולקצבים מהירים (מעל 140 BPM) על פני סאונד אקוסטי.
+- **A drop of about 5,642 points in AIC** (from ~86,676 to ~81,034) and a ~22% increase in explained variance (R²).
+- The `danceability × energy` interaction is the most influential factor (coefficient ‎+31.32‎): audiences seek songs that are both rhythmic and energetic.
+- Energy alone is harmful (`energy²` negative, ‎-24.11‎), danceable instrumental songs are penalized, and "happy" songs succeed mainly when they are also energetic.
+- A clear audience preference for electronic production and fast tempos (above 140 BPM) over an acoustic sound.
 
-## מסקנה
+## Conclusion
 
-הצלחת שיר אינה תלויה במשתנה בודד אלא בשילובים סינרגטיים בין מאפיינים מוזיקליים. אנרגיה גבוהה כשלעצמה מרתיעה, אך בשילוב עם יכולת ריקוד היא המפתח ללהיט.
+A song's success does not depend on a single variable but on synergistic combinations of musical attributes. High energy on its own is off-putting, but combined with danceability it becomes the key to a hit.
 
-## הרצת הקוד
+## Running the code
 
-הקוד כתוב ב-R ומשתמש בחבילות הבאות:
+The code is written in R and uses the following packages:
 
 ```r
 install.packages(c("dplyr", "ggplot2", "gridExtra", "plotly", "lmtest", "nortest"))
 ```
 
-הקוד מניח קיום של אובייקט הנתונים `song_popularity` בסביבת העבודה (תוצר חלק א׳ של הפרויקט).
+The code assumes the existence of a `song_popularity` data object in the working environment (the output of Part A of the project).
